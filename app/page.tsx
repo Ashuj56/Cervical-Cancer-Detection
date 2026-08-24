@@ -25,22 +25,22 @@ export default function HomePage() {
     {
       num: "01",
       icon: Users,
-      title: "ASHA Worker Visits",
-      desc: "Our trained ASHA workers visit homes in your village and capture a simple cervix image using their phone.",
+      title: "ASHA Worker Connects",
+      desc: "ASHA workers identify and educate women in rural communities, then connect them to a nearby screening point or mobile clinic.",
       color: "bg-teal-600",
     },
     {
       num: "02",
       icon: Microscope,
-      title: "AI Analyzes in Seconds",
-      desc: "Our AI model reviews the image instantly and flags any abnormality — Normal, Mild, or High Risk.",
+      title: "Trained Provider Screens",
+      desc: "A trained healthcare provider performs the examination and captures a standardized cervical image using a portable imaging device.",
       color: "bg-teal-700",
     },
     {
       num: "03",
       icon: Stethoscope,
-      title: "Doctor Recommends Care",
-      desc: "A specialist doctor reviews the result and recommends the right next step — follow-up or immediate referral.",
+      title: "AI + Doctor Recommends Care",
+      desc: "AI analyzes the image for risk, while a qualified clinician reviews the result and recommends follow-up or referral.",
       color: "bg-plum-700 dark:bg-purple-700",
     },
   ]
@@ -49,7 +49,7 @@ export default function HomePage() {
     {
       icon: Users,
       title: "ASHA Worker",
-      desc: "Screen patients in the field with a simple 3-step guided workflow. No training required beyond your ASHA certification.",
+      desc: "Identify, educate, and connect women in rural communities to nearby screening points and mobile clinics.",
       cta: "Worker Login",
       path: "/login",
       gradient: "from-teal-500 to-teal-700",

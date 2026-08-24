@@ -38,50 +38,50 @@ export default function AashaWorkerGuidelines() {
 
   const aiAnalysisGuidelines = [
     {
-      title: "Photo Capture Guidelines",
-      description: "Best practices for capturing cervix photos",
+      title: "Screening Referral Guidelines",
+      description: "Best practices for referring women to clinical screening points",
       priority: "critical",
       steps: [
-        "Ensure proper lighting and clear visibility",
-        "Use appropriate medical equipment for photography",
-        "Maintain patient privacy and dignity during procedure",
-        "Capture multiple angles if necessary for clarity",
-        "Verify image quality before proceeding with analysis",
-        "Store images securely according to privacy protocols",
+        "Identify women aged 30-65 in your assigned village/community",
+        "Educate women on cervical cancer prevention and early detection",
+        "Explain the VIA screening procedure performed at Primary Health Centres / Mobile Camps",
+        "Register the patient and generate a unique patient ID",
+        "Guide the patient to the designated screening point or mobile unit",
+        "Ensure patient privacy, dignity, and cultural sensitivity throughout outreach",
       ],
     },
     {
-      title: "AI Result Interpretation",
-      description: "Understanding and acting on AI analysis results",
+      title: "Follow-up & Communication Protocol",
+      description: "Communicating screening results and doctor recommendations",
       priority: "critical",
       steps: [
-        "Review AI confidence levels carefully",
-        "Understand the difference between normal and abnormal results",
-        "Follow immediate action protocols for abnormal results",
-        "Document all analysis results in patient records",
-        "Refer patients to doctors based on results",
-        "Provide appropriate counseling to patients",
+        "Check screening results uploaded by the clinical team & doctor",
+        "Understand doctor recommendations (Routine Follow-up vs Specialist Referral)",
+        "Visit patient to explain doctor advice in simple local language",
+        "Assist in arranging transportation or appointments if high-risk referral is recommended",
+        "Maintain patient confidentiality at all times",
+        "Provide ongoing emotional support and health counseling",
       ],
     },
   ]
 
   const emergencyProtocols = [
     {
-      title: "Abnormal Result Protocol",
-      description: "Immediate actions for abnormal AI analysis results",
+      title: "High Risk Result Follow-up Protocol",
+      description: "Immediate actions when doctor flags a high-risk case",
       priority: "critical",
       actions: [
-        "Contact patient immediately (within 2 hours)",
-        "Explain results in a calm, supportive manner",
-        "Schedule urgent appointment with gynecologist",
-        "Provide emotional support and reassurance",
-        "Document all communications and actions taken",
-        "Follow up to ensure patient receives proper care",
+        "Contact patient immediately (within 24 hours)",
+        "Explain doctor advice in a calm, supportive manner",
+        "Help schedule urgent referral appointment with hospital/gynecologist",
+        "Provide emotional support and family counseling",
+        "Document all interactions and track attendance at referral center",
+        "Follow up post-treatment to ensure complete care continuum",
       ],
     },
     {
       title: "Emergency Situations",
-      description: "Handling medical emergencies during screening",
+      description: "Handling medical emergencies during outreach or transport",
       priority: "critical",
       actions: [
         "Call emergency services (108) immediately",
@@ -112,7 +112,7 @@ export default function AashaWorkerGuidelines() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Aasha Worker Guidelines</h2>
-          <p className="text-gray-600">Essential protocols for cervical cancer screening</p>
+          <p className="text-gray-600">Essential protocols for community outreach & screening referrals</p>
         </div>
         <Button variant="outline" className="gap-2 bg-transparent">
           <Download className="h-4 w-4" />
@@ -128,7 +128,7 @@ export default function AashaWorkerGuidelines() {
           </TabsTrigger>
           <TabsTrigger value="analysis" className="gap-2">
             <Camera className="h-4 w-4" />
-            AI Analysis
+            Screening Referral
           </TabsTrigger>
           <TabsTrigger value="emergency" className="gap-2">
             <AlertTriangle className="h-4 w-4" />

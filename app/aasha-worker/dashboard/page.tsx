@@ -16,7 +16,7 @@ import ContactDoctor from "@/components/aasha-worker/contact-doctor"
 import ContactPatients from "@/components/aasha-worker/contact-patients"
 import AashaWorkerGuidelines from "@/components/aasha-worker/aasha-worker-guidelines"
 import AssignPatient from "@/components/aasha-worker/assign-patient"
-import { LogOut, User, UserPlus, BookOpen, MessageCircle, Link2, Activity } from "lucide-react"
+import { LogOut, User, UserPlus, BookOpen, MessageCircle, Link2, Activity, MapPin } from "lucide-react"
 
 export default function AashaWorkerDashboard() {
   const [activeTab, setActiveTab] = useState("add-patient")
@@ -99,7 +99,7 @@ export default function AashaWorkerDashboard() {
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
               >
                 <UserPlus className="h-4 w-4" />
-                <span className="hidden lg:inline">{t.ashaWorker.addPatient}</span>
+                <span className="hidden lg:inline">Register Patient</span>
               </TabsTrigger>
               <TabsTrigger
                 value="contact-doctor"
@@ -126,8 +126,8 @@ export default function AashaWorkerDashboard() {
                 value="assign"
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
               >
-                <Link2 className="h-4 w-4" />
-                <span className="hidden lg:inline">Assign</span>
+                <MapPin className="h-4 w-4" />
+                <span className="hidden lg:inline">Screening Referrals</span>
               </TabsTrigger>
             </TabsList>
 

@@ -223,18 +223,15 @@ export default function AashaWorkerProfile() {
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Analysis Completed</span>
+                <span className="text-sm font-medium">Screenings Referred</span>
                 <Badge variant="default" className="bg-green-500">
-                  {stats.analysisCompleted}
+                  {stats.patientsRegistered}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Success Rate</span>
+                <span className="text-sm font-medium">Screening Referral Rate</span>
                 <Badge variant="default" className="bg-purple-500">
-                  {stats.patientsRegistered > 0
-                    ? Math.round((stats.analysisCompleted / stats.patientsRegistered) * 100)
-                    : 0}
-                  %
+                  100%
                 </Badge>
               </div>
             </CardContent>
@@ -250,12 +247,12 @@ export default function AashaWorkerProfile() {
                 Register New Patient
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2 bg-transparent">
-                <Camera className="h-4 w-4" />
-                Analyze Cervix Photo
+                <MapPin className="h-4 w-4" />
+                Track Screening Referrals
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2 bg-transparent">
                 <BookOpen className="h-4 w-4" />
-                View Guidelines
+                View Outreach Guidelines
               </Button>
             </CardContent>
           </Card>
