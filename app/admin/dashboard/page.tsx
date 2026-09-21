@@ -89,32 +89,34 @@ export default function AdminDashboard() {
                 <span className="hidden sm:inline">{t.common.profile}</span>
               </TabsTrigger>
               <TabsTrigger
-                value="add-doctor"
-                className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
-              >
-                <Stethoscope className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Doctor</span>
-              </TabsTrigger>
-              <TabsTrigger
                 value="add-hospital"
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
               >
                 <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Hospital</span>
+                <span className="hidden sm:inline">Add Hospitals</span>
               </TabsTrigger>
+
+              <TabsTrigger
+                value="add-doctor"
+                className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              >
+                <Stethoscope className="h-4 w-4" />
+                <span className="hidden sm:inline">Add Doctors</span>
+              </TabsTrigger>
+
               <TabsTrigger
                 value="add-asha-worker"
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
               >
                 <UserPlus className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.admin.addAshaWorker || "Add ASHA Worker"}</span>
+                <span className="hidden sm:inline">{t.admin.addAshaWorker || "Add ASHA Workers"}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="add-screening-unit"
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
               >
                 <Microscope className="h-4 w-4" />
-                <span className="hidden sm:inline">Screening Unit</span>
+                <span className="hidden sm:inline">Add Screening Units</span>
               </TabsTrigger>
               <TabsTrigger
                 value="manage"

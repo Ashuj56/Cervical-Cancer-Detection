@@ -24,7 +24,7 @@ export default function AddDoctorForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const [hospitals, setHospitals] = useState<Hospital[]>([])
-  const current = getCurrentUser() // current admin/ASHA id for createdBy
+  const current = getCurrentUser() 
 
   useEffect(() => {
     const load = async () => {

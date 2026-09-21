@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,14 +11,19 @@ import { useToast } from "@/hooks/use-toast"
 import { getCurrentUser } from "@/lib/auth"
 import {
   appointmentService,
-  doctorService,
   hospitalService,
-  patientService,
   type Appointment,
-  type Doctor,
   type Hospital,
 } from "@/lib/api-services"
 import { Calendar, Stethoscope, Building2, Clock, Loader2 } from "lucide-react"
+
+const API_BASE = "http://localhost:5000/api"
+
+interface DoctorBasic {
+  id: string
+  name: string
+  specialization: string
+}
 
 export default function BookAppointment() {
   const { toast } = useToast()
@@ -26,9 +31,10 @@ export default function BookAppointment() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const hasFetched = useRef(false)
 
   const [hospitals, setHospitals] = useState<Hospital[]>([])
-  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [doctors, setDoctors] = useState<DoctorBasic[]>([])
   const [appointments, setAppointments] = useState<Appointment[]>([])
 
   const [selectedHospitalId, setSelectedHospitalId] = useState<string>("")
@@ -38,42 +44,48 @@ export default function BookAppointment() {
   const [reason, setReason] = useState<string>("")
 
   useEffect(() => {
+    if (hasFetched.current || !user?.id) return
+    hasFetched.current = true
+
     const load = async () => {
-      if (!user?.id) return
       try {
         setLoading(true)
-        console.log("[v0] BookAppointment loading for user:", user.id)
-        const [hs, ds, appts, me] = await Promise.all([
+        // Run all fetches in parallel for speed
+        const [hs, rawDoctors, appts] = await Promise.all([
           hospitalService.getAll(),
-          doctorService.getAll(),
+          fetch(`${API_BASE}/doctors`).then((r) => r.json()).catch(() => []),
           appointmentService.getByPatient(user.id),
-          patientService.getById(user.id),
         ])
+
         setHospitals(hs)
-        setDoctors(ds)
-        const myAppointments = appts.filter((a) => a.patientId === user.id)
-        setAppointments(myAppointments)
-        if (me?.preferredHospitalId) {
-          setSelectedHospitalId(me.preferredHospitalId)
-        }
+
+        const mappedDoctors: DoctorBasic[] = (Array.isArray(rawDoctors) ? rawDoctors : []).map((d: any) => ({
+          id: d._id || d.id,
+          name: d.name,
+          specialization: d.specialization || "",
+        }))
+        setDoctors(mappedDoctors)
+
+        // Appointments already filtered by patientId on server side
+        setAppointments(appts)
       } catch (e: any) {
         console.error("[v0] BookAppointment load error:", e)
         toast({
           title: "Unable to load",
-          description: e?.message || "We couldn't load hospitals, doctors, or appointments.",
+          description: e?.message || "We couldn't load hospitals or appointments.",
         })
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [user?.id, toast])
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredDoctors = useMemo(() => {
     if (!selectedHospitalId) return doctors
     const hospital = hospitals.find((h) => h.id === selectedHospitalId)
     if (!hospital) return doctors
-    if (!hospital.doctorIds || hospital.doctorIds.length === 0) return []
+    if (!hospital.doctorIds || hospital.doctorIds.length === 0) return doctors
     const set = new Set(hospital.doctorIds)
     return doctors.filter((d) => d.id && set.has(d.id))
   }, [doctors, hospitals, selectedHospitalId])
@@ -101,23 +113,17 @@ export default function BookAppointment() {
         reason: reason.trim(),
         status: "scheduled",
       })
+      // Refresh just appointments (not everything)
       const appts = await appointmentService.getByPatient(user.id)
-      const myAppointments = appts.filter((a) => a.patientId === user.id)
-      setAppointments(myAppointments)
+      setAppointments(appts)
       setSelectedDoctorId("")
       setDate("")
       setTime("")
       setReason("")
-      toast({
-        title: "Appointment booked",
-        description: "Your appointment has been scheduled successfully.",
-      })
+      toast({ title: "Appointment booked", description: "Your appointment has been scheduled successfully." })
     } catch (e: any) {
       console.error("[v0] Create appointment error:", e)
-      toast({
-        title: "Could not book",
-        description: e?.message || "We couldn't create the appointment. Please try again.",
-      })
+      toast({ title: "Could not book", description: e?.message || "We couldn't create the appointment. Please try again." })
     } finally {
       setSaving(false)
     }
@@ -146,7 +152,7 @@ export default function BookAppointment() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="text-sm font-medium">Hospital</div>
-              <Select value={selectedHospitalId} onValueChange={setSelectedHospitalId}>
+              <Select value={selectedHospitalId} onValueChange={(v) => { setSelectedHospitalId(v); setSelectedDoctorId("") }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select hospital" />
                 </SelectTrigger>
@@ -169,7 +175,7 @@ export default function BookAppointment() {
               <div className="text-sm font-medium">Doctor</div>
               <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select doctor" />
+                  <SelectValue placeholder={filteredDoctors.length === 0 ? "No doctors for this hospital" : "Select doctor"} />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredDoctors.map((d) => (
@@ -191,7 +197,7 @@ export default function BookAppointment() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <div className="text-sm font-medium">Date</div>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} min={new Date().toISOString().split("T")[0]} />
             </div>
             <div className="space-y-2">
               <div className="text-sm font-medium">Time</div>
@@ -209,7 +215,7 @@ export default function BookAppointment() {
           </div>
 
           <Button className="w-full" onClick={handleCreate} disabled={saving}>
-            {saving ? "Booking..." : "Book Appointment"}
+            {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Booking…</> : "Book Appointment"}
           </Button>
         </CardContent>
       </Card>
@@ -237,8 +243,11 @@ export default function BookAppointment() {
                     <div className="text-sm">
                       {new Date(a.date).toLocaleDateString()} • {a.time}
                     </div>
+                    {a.reason && <div className="text-xs text-muted-foreground mt-0.5">{a.reason}</div>}
                   </div>
-                  <Badge variant="secondary">{a.status}</Badge>
+                  <Badge variant={a.status === "scheduled" ? "default" : a.status === "completed" ? "secondary" : "destructive"}>
+                    {a.status}
+                  </Badge>
                 </div>
               )
             })

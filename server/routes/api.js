@@ -130,6 +130,16 @@ router.put("/doctors/:id", async (req, res) => {
   }
 });
 
+// DELETE doctor
+router.delete("/doctors/:id", async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "Doctor deleted" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // ── ASHA WORKERS ─────────────────────────────────────────────────────────────
 // GET ASHA workers
 router.get("/asha-workers", async (req, res) => {
@@ -149,6 +159,16 @@ router.put("/asha-workers/:id", async (req, res) => {
       return res.status(404).json({ error: "ASHA worker not found" });
     }
     res.json(worker);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// DELETE ASHA worker
+router.delete("/asha-workers/:id", async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "ASHA worker deleted" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -316,6 +336,23 @@ router.post("/chats", async (req, res) => {
     res.status(201).json(chat);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// ── STATS SUMMARY ─────────────────────────────────────────────────────────────
+// GET /api/stats — Returns counts for all entity types in a single request
+router.get("/stats", async (req, res) => {
+  try {
+    const [patients, doctors, ashaWorkers, screeningUnits, hospitals] = await Promise.all([
+      Patient.countDocuments(),
+      User.countDocuments({ role: "doctor" }),
+      User.countDocuments({ role: "aasha_worker" }),
+      User.countDocuments({ role: { $in: ["lab", "pathology", "screening_van"] } }),
+      Hospital.countDocuments(),
+    ]);
+    res.json({ patients, doctors, ashaWorkers, screeningUnits, hospitals });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

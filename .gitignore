@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+server/node_modules/
 /.pnp
 .pnp.js
 
@@ -9,13 +10,14 @@ build/
 out/
 .next/
 .vite/
+*.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # Environment variables & secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+server/.env
 *.env
 
 # Logs
@@ -46,7 +48,7 @@ Thumbs.db
 .temp/
 tmp/
 
-# Python / ML artifacts (for AI models)
+# Python / ML artifacts (for AI models & scripts)
 __pycache__/
 *.py[cod]
 *$py.class
@@ -58,3 +60,4 @@ env/
 *.pt
 *.pth
 *.onnx
+*.keras

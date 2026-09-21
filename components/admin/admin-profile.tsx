@@ -7,39 +7,63 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { getCurrentUser } from "@/lib/auth"
-import { User, Phone, MapPin, Edit, Save } from "lucide-react"
-import { patientService, doctorService, hospitalService } from "@/lib/api-services"
+import { User, Phone, MapPin, Edit, Save, Users, Stethoscope, Building2, Heart, Microscope } from "lucide-react"
+// Stats loaded from single endpoint below
 
 export default function AdminProfile() {
   const [isEditing, setIsEditing] = useState(false)
-  const [profileData, setProfileData] = useState({
-    name: "System Administrator",
-    mobile: "+91 9876543210",
-    region: "Nagpur, Maharashtra",
-    email: "admin@cancerdetection.gov.in",
-  })
-  const [counts, setCounts] = useState({ patients: 0, doctors: 0, hospitals: 0 })
-  const { toast } = useToast()
   const user = getCurrentUser()
+
+  const [profileData, setProfileData] = useState({
+    name: user?.name || "System Administrator",
+    mobile: (user as any)?.phone || "+91 9876543210",
+    region: (user as any)?.region || "Nagpur, Maharashtra",
+    email: user?.email || "admin@cancerdetection.gov.in",
+  })
+  const [counts, setCounts] = useState({
+    patients: 0,
+    doctors: 0,
+    hospitals: 0,
+    ashaWorkers: 0,
+    screeningUnits: 0,
+  })
+  const [loadingStats, setLoadingStats] = useState(true)
+  const { toast } = useToast()
+
+  // Sync profile from user object whenever component mounts
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || "System Administrator",
+        mobile: (user as any)?.phone || "+91 9876543210",
+        region: (user as any)?.region || "Nagpur, Maharashtra",
+        email: user.email || "admin@cancerdetection.gov.in",
+      })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const loadCounts = async () => {
+      setLoadingStats(true)
       try {
-        const [patients, doctors, hospitals] = await Promise.all([
-          patientService.getAll(),
-          doctorService.getAll(),
-          hospitalService.getAll(),
-        ])
-        setCounts({
-          patients: patients.length,
-          doctors: doctors.length,
-          hospitals: hospitals.length,
-        })
+        const res = await fetch("http://localhost:5000/api/stats")
+        if (res.ok) {
+          const data = await res.json()
+          setCounts({
+            patients: data.patients ?? 0,
+            doctors: data.doctors ?? 0,
+            hospitals: data.hospitals ?? 0,
+            ashaWorkers: data.ashaWorkers ?? 0,
+            screeningUnits: data.screeningUnits ?? 0,
+          })
+        }
       } catch (e) {
         toast({
           title: "Could not load stats",
-          description: "We couldn’t fetch live counts. They will appear once data is available.",
+          description: "We couldn't fetch live counts. They will appear once data is available.",
         })
+      } finally {
+        setLoadingStats(false)
       }
     }
     loadCounts()
@@ -59,6 +83,14 @@ export default function AdminProfile() {
       [field]: value,
     }))
   }
+
+  const statCards = [
+    { label: "Total Patients", value: counts.patients, color: "text-blue-600", icon: Users, bg: "bg-blue-50", sub: "Patients registered" },
+    { label: "Total Doctors", value: counts.doctors, color: "text-green-600", icon: Stethoscope, bg: "bg-green-50", sub: "Doctors in system" },
+    { label: "Total Hospitals", value: counts.hospitals, color: "text-purple-600", icon: Building2, bg: "bg-purple-50", sub: "Hospitals available" },
+    { label: "ASHA Workers", value: counts.ashaWorkers, color: "text-rose-600", icon: Heart, bg: "bg-rose-50", sub: "Community health workers" },
+    { label: "Screening Units", value: counts.screeningUnits, color: "text-orange-600", icon: Microscope, bg: "bg-orange-50", sub: "Labs, vans & pathology" },
+  ]
 
   return (
     <div className="space-y-6">
@@ -151,36 +183,25 @@ export default function AdminProfile() {
       </Card>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6" aria-live="polite">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{counts.patients}</div>
-            <p className="text-xs text-muted-foreground">Patients registered</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Doctors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{counts.doctors}</div>
-            <p className="text-xs text-muted-foreground">Doctors in system</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Hospitals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{counts.hospitals}</div>
-            <p className="text-xs text-muted-foreground">Hospitals available</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" aria-live="polite">
+        {statCards.map(({ label, value, color, icon: Icon, bg, sub }) => (
+          <Card key={label}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium text-gray-600">{label}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`flex items-center gap-2 mb-1`}>
+                <div className={`p-1.5 rounded-md ${bg}`}>
+                  <Icon className={`h-4 w-4 ${color}`} />
+                </div>
+                <div className={`text-2xl font-bold ${color}`}>
+                  {loadingStats ? "…" : value}
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">{sub}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   )

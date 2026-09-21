@@ -1,14 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { MessageCircle, Send, Phone, User, Heart } from "lucide-react"
-import { chatService, ashaWorkerService, patientService } from "@/lib/api-services"
+import { MessageCircle, Send, Phone, User, Heart, Loader2 } from "lucide-react"
+import { chatService, patientService } from "@/lib/api-services"
 import { getCurrentUser } from "@/lib/auth"
+
+const API_BASE = "http://localhost:5000/api"
 
 interface Message {
   id: string
@@ -26,25 +28,36 @@ export default function ContactAashaPatient() {
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
   const currentUser = getCurrentUser()
+  const hasFetched = useRef(false)
 
   useEffect(() => {
+    if (hasFetched.current) return
+    hasFetched.current = true
+
     const loadChatData = async () => {
       try {
         if (!currentUser) return
 
-        // ✅ Fetch only this patient's document — not the entire collection
-        const currentPatient = await patientService.getById(currentUser.id)
+        // Fetch patient record and all ASHA workers in parallel
+        const [currentPatient, ashaWorkersData] = await Promise.all([
+          patientService.getById(currentUser.id),
+          fetch(`${API_BASE}/asha-workers`).then((r) => r.json()).catch(() => []),
+        ])
 
         if (currentPatient?.ashaWorkerId) {
-          const ashaWorkerData = await ashaWorkerService.getById(currentPatient.ashaWorkerId)
+          // Find the ASHA worker directly from already-fetched list — no extra round-trip
+          const rawWorkers: any[] = Array.isArray(ashaWorkersData) ? ashaWorkersData : []
+          const found = rawWorkers.find(
+            (w: any) => w._id === currentPatient.ashaWorkerId || w.id === currentPatient.ashaWorkerId,
+          )
+          const ashaWorkerData = found ? { ...found, id: found._id } : null
           setAshaWorker(ashaWorkerData)
 
-          // Load chat messages between patient and ASHA worker
+          // Load chat messages simultaneously
           const chatMessages = await chatService.getMessages(currentUser.id, undefined, currentPatient.ashaWorkerId)
 
-          // Format messages for component
           const formattedMessages: Message[] = chatMessages.map((msg) => {
-            const msgDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp || Date.now())
+            const msgDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp || msg.createdAt || Date.now())
             return {
               id: msg.id!,
               sender: (msg.senderType === "patient" ? "patient" : "aasha") as "patient" | "aasha",
@@ -56,9 +69,6 @@ export default function ContactAashaPatient() {
           })
 
           setMessages(formattedMessages)
-        } else {
-          // No assigned ASHA worker found for this patient
-          console.log("[v0] No ashaWorkerId on patient record")
         }
       } catch (error) {
         console.error("[v0] Error loading chat data:", error)
@@ -73,7 +83,7 @@ export default function ContactAashaPatient() {
     }
 
     loadChatData()
-  }, [currentUser, toast])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSendMessage = async () => {
     if (newMessage.trim() && currentUser && ashaWorker) {
@@ -84,10 +94,8 @@ export default function ContactAashaPatient() {
           senderId: currentUser.id,
           senderType: "patient",
           message: newMessage,
-          isRead: false,
         })
 
-        // Add message to local state for immediate UI update
         const message: Message = {
           id: messageId,
           sender: "patient",
@@ -98,30 +106,25 @@ export default function ContactAashaPatient() {
         }
         setMessages([...messages, message])
         setNewMessage("")
-        toast({
-          title: "Message sent",
-          description: "Your message has been sent to your ASHA Worker.",
-        })
+        toast({ title: "Message sent", description: "Your message has been sent to your ASHA Worker." })
       } catch (error) {
         console.error("[v0] Error sending message:", error)
-        toast({
-          title: "Error",
-          description: "Failed to send message",
-          variant: "destructive",
-        })
+        toast({ title: "Error", description: "Failed to send message", variant: "destructive" })
       }
     }
   }
 
   const handleEmergencyCall = () => {
-    toast({
-      title: "Emergency call initiated",
-      description: "Connecting you with your ASHA Worker...",
-    })
+    toast({ title: "Emergency call initiated", description: "Connecting you with your ASHA Worker..." })
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center p-8">Loading chat...</div>
+    return (
+      <div className="flex items-center justify-center p-12" role="status">
+        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+        <span>Loading chat...</span>
+      </div>
+    )
   }
 
   return (
@@ -137,22 +140,26 @@ export default function ContactAashaPatient() {
             <CardDescription>Your dedicated community health supporter</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span className="font-medium">{ashaWorker?.name || "Loading..."}</span>
+            {ashaWorker ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="font-medium">{ashaWorker.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span className="text-sm">{ashaWorker.phone || "Not provided"}</span>
+                </div>
+                <div className="text-sm text-muted-foreground">{ashaWorker.address || "—"}</div>
+                <div className="text-sm text-muted-foreground">Experience: {ashaWorker.experience || "—"}</div>
+                <Badge variant="default" className="w-fit">
+                  <Heart className="h-3 w-3 mr-1" />
+                  Available
+                </Badge>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span className="text-sm">{ashaWorker?.phone || "Loading..."}</span>
-              </div>
-              <div className="text-sm text-muted-foreground">{ashaWorker?.address || "Loading..."}</div>
-              <div className="text-sm text-muted-foreground">Experience: {ashaWorker?.experience || "Loading..."}</div>
-              <Badge variant="default" className="w-fit">
-                <Heart className="h-3 w-3 mr-1" />
-                Available
-              </Badge>
-            </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No ASHA Worker assigned yet. Please contact the admin.</p>
+            )}
             <Button onClick={handleEmergencyCall} variant="destructive" className="w-full">
               <Phone className="h-4 w-4 mr-2" />
               Emergency Call
@@ -203,17 +210,18 @@ export default function ContactAashaPatient() {
               <Textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={ashaWorker ? "Type your message..." : "No ASHA Worker assigned yet"}
                 rows={2}
                 className="flex-1"
-                onKeyPress={(e) => {
+                disabled={!ashaWorker}
+                onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault()
                     handleSendMessage()
                   }
                 }}
               />
-              <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+              <Button onClick={handleSendMessage} disabled={!newMessage.trim() || !ashaWorker}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>
@@ -233,6 +241,7 @@ export default function ContactAashaPatient() {
               variant="outline"
               onClick={() => setNewMessage("I have some questions about my recent report. Can we discuss?")}
               className="text-left justify-start h-auto p-4"
+              disabled={!ashaWorker}
             >
               <div>
                 <div className="font-medium">Ask about report</div>
@@ -243,6 +252,7 @@ export default function ContactAashaPatient() {
               variant="outline"
               onClick={() => setNewMessage("I'm experiencing some symptoms and would like to discuss them with you.")}
               className="text-left justify-start h-auto p-4"
+              disabled={!ashaWorker}
             >
               <div>
                 <div className="font-medium">Report symptoms</div>
@@ -253,6 +263,7 @@ export default function ContactAashaPatient() {
               variant="outline"
               onClick={() => setNewMessage("Can you help me schedule my next appointment?")}
               className="text-left justify-start h-auto p-4"
+              disabled={!ashaWorker}
             >
               <div>
                 <div className="font-medium">Schedule appointment</div>
@@ -263,6 +274,7 @@ export default function ContactAashaPatient() {
               variant="outline"
               onClick={() => setNewMessage("I need some emotional support and guidance. Can we talk?")}
               className="text-left justify-start h-auto p-4"
+              disabled={!ashaWorker}
             >
               <div>
                 <div className="font-medium">Need support</div>

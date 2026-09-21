@@ -162,6 +162,10 @@ export const doctorService = {
     const data = await res.json()
     return { ...data, id: data._id } as Doctor
   },
+
+  async delete(id: string) {
+    await fetch(`${API_BASE}/doctors/${id}`, { method: "DELETE" })
+  },
 }
 
 export interface PatientDoctorAssignment {
@@ -194,6 +198,10 @@ export const ashaWorkerService = {
     if (!res.ok) return
     const data = await res.json()
     return { ...data, id: data._id } as AshaWorker
+  },
+
+  async delete(id: string) {
+    await fetch(`${API_BASE}/asha-workers/${id}`, { method: "DELETE" })
   },
 }
 
