@@ -8,6 +8,7 @@ import AdminDashboard from "@/app/admin/dashboard/page"
 import DoctorDashboard from "@/app/doctor/dashboard/page"
 import AashaWorkerDashboard from "@/app/aasha-worker/dashboard/page"
 import PatientDashboard from "@/app/patient/dashboard/page"
+import ScreeningDashboardPage from "@/app/screening/dashboard/page"
 import { Toaster } from "@/components/ui/toaster"
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
         <Route path="/aasha-worker/dashboard" element={<AashaWorkerDashboard />} />
         <Route path="/patient/dashboard" element={<PatientDashboard />} />
+        <Route path="/screening/dashboard" element={<ScreeningDashboardPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />

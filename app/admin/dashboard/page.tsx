@@ -14,9 +14,11 @@ import AdminProfile from "@/components/admin/admin-profile"
 import AddDoctorForm from "@/components/admin/add-doctor-form"
 import AddHospitalForm from "@/components/admin/add-hospital-form"
 import AddAashaWorkerForm from "@/components/admin/add-aasha-worker-form"
+import AddScreeningUnitForm from "@/components/admin/add-screening-unit-form"
 import ManageConnections from "@/components/admin/manage-connections"
 import AdminGuidelines from "@/components/admin/admin-guidelines"
-import { LogOut, Users, Building2, Stethoscope, Settings, UserPlus, Brain } from "lucide-react"
+import { BrandLogo } from "@/components/brand-logo"
+import { LogOut, Users, Building2, Stethoscope, Settings, UserPlus, Microscope } from "lucide-react"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("profile")
@@ -50,18 +52,11 @@ export default function AdminDashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Brand + Title */}
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                  <Brain className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">
-                    System Administration
-                  </h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {t.common.welcome}, <span className="text-indigo-600 dark:text-indigo-400 font-medium">{user?.name}</span>
-                  </p>
-                </div>
+              <div className="flex items-center gap-4">
+                <BrandLogo subtitle="System Administration" href="/admin/dashboard" />
+                <span className="hidden md:inline-block text-xs text-gray-400 border-l border-gray-200 dark:border-slate-700 pl-3">
+                  {t.common.welcome}, <span className="text-indigo-600 dark:text-indigo-400 font-medium">{user?.name}</span>
+                </span>
               </div>
 
               {/* Actions */}
@@ -85,7 +80,7 @@ export default function AdminDashboard() {
         {/* ====== Main Content ====== */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-1 shadow-sm h-auto">
+            <TabsList className="grid w-full grid-cols-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-1 shadow-sm h-auto">
               <TabsTrigger
                 value="profile"
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
@@ -113,6 +108,13 @@ export default function AdminDashboard() {
               >
                 <UserPlus className="h-4 w-4" />
                 <span className="hidden sm:inline">{t.admin.addAshaWorker || "Add ASHA Worker"}</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="add-screening-unit"
+                className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              >
+                <Microscope className="h-4 w-4" />
+                <span className="hidden sm:inline">Screening Unit</span>
               </TabsTrigger>
               <TabsTrigger
                 value="manage"
@@ -167,6 +169,10 @@ export default function AdminDashboard() {
 
             <TabsContent value="add-asha-worker">
               {visitedTabs.has("add-asha-worker") && <AddAashaWorkerForm />}
+            </TabsContent>
+
+            <TabsContent value="add-screening-unit">
+              {visitedTabs.has("add-screening-unit") && <AddScreeningUnitForm />}
             </TabsContent>
 
             <TabsContent value="manage">

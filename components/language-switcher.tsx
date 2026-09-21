@@ -1,9 +1,8 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Globe } from "lucide-react"
-import { useTranslation, type Language } from "@/lib/i18n"
+import { useI18n } from "@/lib/i18n-context"
+import type { Language } from "@/lib/i18n"
 
 const languages = [
   { code: "en" as Language, name: "English", flag: "🇺🇸" },
@@ -12,7 +11,7 @@ const languages = [
 ]
 
 export function LanguageSwitcher() {
-  const { language, changeLanguage, t } = useTranslation()
+  const { language, changeLanguage } = useI18n()
 
   const currentLanguage = languages.find((lang) => lang.code === language)
 

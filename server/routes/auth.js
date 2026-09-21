@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Patient = require("../models/Patient");
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "cervical_cancer_secret_key_12345";
@@ -14,7 +15,11 @@ const generateToken = (id) => {
 // @desc    Register a new user
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role, phone, address, region } = req.body;
+    const {
+      name, email, password, role, phone, address, region,
+      specialization, hospitalId, experience, createdBy,
+      patientId, age, gender, medicalHistory, ashaWorkerId, symptoms,
+    } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -26,10 +31,33 @@ router.post("/register", async (req, res) => {
       email,
       password,
       role: role || "patient",
-      phone,
-      address,
-      region,
+      phone: phone || "",
+      address: address || "",
+      region: region || "",
+      specialization: specialization || "",
+      hospitalId: hospitalId || null,
+      experience: experience || "",
+      createdBy: createdBy || null,
     });
+
+    // Also create a Patient record when registering a patient
+    if ((role || "patient") === "patient") {
+      const pId = patientId || `PAT${Math.floor(10000 + Math.random() * 90000)}`;
+      await Patient.create({
+        patientId: pId,
+        name: name || "",
+        age: Number(age) || 0,
+        gender: gender || "Female",
+        phone: phone || "",
+        email: email || "",
+        address: address || "",
+        medicalHistory: medicalHistory || "",
+        symptoms: symptoms || "",
+        ashaWorkerId: ashaWorkerId || null,
+        userId: user._id,
+        createdBy: createdBy || null,
+      });
+    }
 
     const token = generateToken(user._id);
 

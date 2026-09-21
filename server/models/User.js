@@ -8,12 +8,16 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["admin", "doctor", "aasha_worker", "patient"],
+      enum: ["admin", "doctor", "aasha_worker", "patient", "lab", "pathology", "screening_van"],
       required: true,
     },
     phone: { type: String },
     address: { type: String },
     region: { type: String },
+    specialization: { type: String },
+    hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: "Hospital" },
+    experience: { type: String },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

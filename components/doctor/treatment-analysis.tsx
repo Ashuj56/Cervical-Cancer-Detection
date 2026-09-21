@@ -49,7 +49,7 @@ export default function TreatmentAnalysis() {
 
       // Ensure this doctor is assigned to the patient
       const assigns = await assignmentService.getByDoctor(doctor.id)
-      const isAssigned = assigns.some((a) => a.patientId === patient.id)
+      const isAssigned = assigns.some((a) => a.patientId === patient.id || a.patientId === patient.patientId)
       if (!isAssigned) {
         setPatientDocId(null)
         setAnalysisId(null)

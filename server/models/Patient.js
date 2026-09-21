@@ -9,9 +9,13 @@ const patientSchema = new mongoose.Schema(
     phone: { type: String },
     address: { type: String },
     medicalHistory: { type: String },
+    symptoms: { type: String },
+    email: { type: String },
     ashaWorkerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    doctorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     preferredHospitalId: { type: mongoose.Schema.Types.ObjectId, ref: "Hospital" },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

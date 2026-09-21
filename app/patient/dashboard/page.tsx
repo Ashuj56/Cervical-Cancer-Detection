@@ -16,6 +16,7 @@ import VoiceSymptoms from "@/components/patient/voice-symptoms"
 import ContactAashaPatient from "@/components/patient/contact-aasha-patient"
 import PatientGuidelines from "@/components/patient/patient-guidelines"
 import BookAppointment from "@/components/patient/book-appointment"
+import { BrandLogo } from "@/components/brand-logo"
 import { LogOut, User, FileText, Mic, MessageCircle, BookOpen, Calendar, Heart } from "lucide-react"
 
 export default function PatientDashboard() {
@@ -50,19 +51,11 @@ export default function PatientDashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Brand + Title */}
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
-                  <Heart className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">
-                    CerviCare
-                  </h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {t.common.welcome}, <span className="text-teal-600 dark:text-teal-400 font-medium">{user?.name}</span>
-                    <span className="ml-1 text-gray-400">· Patient</span>
-                  </p>
-                </div>
+              <div className="flex items-center gap-4">
+                <BrandLogo subtitle="Patient Portal" href="/patient/dashboard" />
+                <span className="hidden md:inline-block text-xs text-gray-400 border-l border-gray-200 dark:border-slate-700 pl-3">
+                  {t.common.welcome}, <span className="text-teal-600 dark:text-teal-400 font-medium">{user?.name}</span>
+                </span>
               </div>
 
               {/* Actions */}

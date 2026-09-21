@@ -55,11 +55,14 @@ export interface CervixAnalysis {
   id?: string
   _id?: string
   patientId: string
-  imageUrl: string
-  analysis: string
-  riskLevel: "low" | "medium" | "high"
+  imageUrl?: string
+  analysis?: string
+  riskLevel?: "low" | "medium" | "high"
+  result?: string          // "normal" | "mild" | "abnormal" – saved by screening dashboard
+  confidence?: number      // 0–100
+  recommendations?: string[]
   doctorId?: string
-  ashaWorkerId: string
+  ashaWorkerId?: string
   doctorFeedback?: string
   nextSteps?: string
   doctorReviewAt?: any
@@ -103,8 +106,15 @@ export const patientService = {
   },
 
   async getById(id: string) {
+    try {
+      const res = await fetch(`${API_BASE}/patients/${id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data) return { ...data, id: data._id } as Patient
+      }
+    } catch {}
     const all = await this.getAll()
-    return all.find((p) => p.id === id || p.patientId === id) || null
+    return all.find((p) => p.id === id || p.patientId === id || (p as any).userId === id) || null
   },
 
   async getByPatientId(patientId: string) {
@@ -236,7 +246,25 @@ export const cervixAnalysisService = {
 
   async getByPatient(patientId: string) {
     const all = await this.getAll()
-    return all.filter((a) => a.patientId === patientId)
+    // Direct match first
+    const direct = all.filter((a) => a.patientId === patientId)
+    if (direct.length > 0) return direct
+
+    // Check if patientId corresponds to a registered patient with alternate identifier (patientId code vs MongoDB id)
+    try {
+      const patient = await patientService.getById(patientId)
+      if (patient) {
+        const ids = new Set([
+          patient.id,
+          patient._id,
+          patient.patientId,
+          (patient as any).userId,
+        ].filter(Boolean))
+        return all.filter((a) => ids.has(a.patientId))
+      }
+    } catch {}
+
+    return []
   },
 
   async update(id: string, updates: Partial<CervixAnalysis>) {
@@ -259,32 +287,71 @@ export const imageService = {
 
 export interface ChatMessage {
   id?: string
+  _id?: string
   patientId?: string
   doctorId?: string
   ashaWorkerId?: string
+  senderId?: string
   senderType: "patient" | "doctor" | "ashaWorker"
   message: string
-  timestamp: any
+  timestamp?: any
+  createdAt?: any
 }
 
 export const chatService = {
-  async sendMessage(msg: any) {
-    return "chat_" + Date.now()
+  async sendMessage(msg: {
+    patientId: string
+    doctorId?: string
+    ashaWorkerId?: string
+    senderId: string
+    senderType: "patient" | "doctor" | "ashaWorker"
+    message: string
+  }) {
+    const res = await fetch(`${API_BASE}/chats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(msg),
+    })
+    const data = await res.json()
+    return data._id || data.id
   },
+
   async getMessages(patientId?: string, doctorId?: string, ashaWorkerId?: string): Promise<ChatMessage[]> {
-    return []
+    const params = new URLSearchParams()
+    if (patientId) params.append("patientId", patientId)
+    if (doctorId) params.append("doctorId", doctorId)
+    if (ashaWorkerId) params.append("ashaWorkerId", ashaWorkerId)
+
+    const res = await fetch(`${API_BASE}/chats?${params.toString()}`)
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data || []).map((d: any) => ({ ...d, id: d._id, timestamp: d.createdAt })) as ChatMessage[]
   },
 }
 
 export const appointmentService = {
-  async create(appt: any) {
-    return "appt_" + Date.now()
+  async create(appt: Omit<Appointment, "id" | "_id">) {
+    const res = await fetch(`${API_BASE}/appointments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appt),
+    })
+    const data = await res.json()
+    return data._id || data.id
   },
+
   async getByPatient(patientId: string): Promise<Appointment[]> {
-    return []
+    const res = await fetch(`${API_BASE}/appointments?patientId=${patientId}`)
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data || []).map((d: any) => ({ ...d, id: d._id })) as Appointment[]
   },
+
   async getByDoctor(doctorId: string): Promise<Appointment[]> {
-    return []
+    const res = await fetch(`${API_BASE}/appointments?doctorId=${doctorId}`)
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data || []).map((d: any) => ({ ...d, id: d._id })) as Appointment[]
   },
 }
 
@@ -308,13 +375,48 @@ export const ashaDoctorLinkService = {
 
 export const assignmentService = {
   async getByAshaWorker(ashaWorkerId: string): Promise<PatientDoctorAssignment[]> {
-    return []
+    try {
+      const res = await fetch(`${API_BASE}/assignments?ashaWorkerId=${ashaWorkerId}`)
+      if (!res.ok) return []
+      const data = await res.json()
+      return (data || []).map((d: any) => ({ ...d, id: d._id })) as PatientDoctorAssignment[]
+    } catch {
+      return []
+    }
   },
+
   async getByDoctor(doctorId: string): Promise<PatientDoctorAssignment[]> {
-    return []
+    try {
+      const res = await fetch(`${API_BASE}/assignments?doctorId=${doctorId}`)
+      if (!res.ok) return []
+      const data = await res.json()
+      return (data || []).map((d: any) => ({ ...d, id: d._id })) as PatientDoctorAssignment[]
+    } catch {
+      return []
+    }
   },
-  async create(assignment: any) {
-    return "assign_" + Date.now()
+
+  async create(assignment: { patientId: string; doctorId: string; ashaWorkerId: string; notes?: string }) {
+    const res = await fetch(`${API_BASE}/assignments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(assignment),
+    })
+    const data = await res.json()
+    return data._id || data.id
+  },
+}
+
+export const screeningUnitService = {
+  async getAll() {
+    try {
+      const res = await fetch(`${API_BASE}/screening-units`)
+      if (!res.ok) return []
+      const data = await res.json()
+      return (data || []).map((d: any) => ({ ...d, id: d._id }))
+    } catch {
+      return []
+    }
   },
 }
 

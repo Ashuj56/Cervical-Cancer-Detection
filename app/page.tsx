@@ -11,6 +11,8 @@ import {
   Activity, Star
 } from "lucide-react"
 
+import { BrandLogo } from "@/components/brand-logo"
+
 export default function HomePage() {
   const { t } = useI18n()
   const navigate = useNavigate()
@@ -91,15 +93,7 @@ export default function HomePage() {
       {/* ─── HEADER ─── */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-teal-100 dark:border-slate-800">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="font-bold text-lg leading-none block text-teal-800 dark:text-teal-300">CerviCare</span>
-              <span className="text-xs text-teal-600 dark:text-teal-400 font-medium">Early Detection · Early Protection</span>
-            </div>
-          </div>
+          <BrandLogo href="/" />
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <ThemeToggle />

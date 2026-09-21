@@ -13,8 +13,8 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import DoctorProfile from "@/components/doctor/doctor-profile"
 import AssignedPatients from "@/components/doctor/assigned-patients"
 import TreatmentAnalysis from "@/components/doctor/treatment-analysis"
-import ContactAasha from "@/components/doctor/contact-aasha"
-import { LogOut, User, Users, FolderOpen, MessageCircle, Stethoscope } from "lucide-react"
+import { BrandLogo } from "@/components/brand-logo"
+import { LogOut, User, Users, FolderOpen, Microscope } from "lucide-react"
 
 export default function DoctorDashboard() {
   const [activeTab, setActiveTab] = useState("profile")
@@ -48,23 +48,24 @@ export default function DoctorDashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Brand + Title */}
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
-                  <Stethoscope className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">
-                    CerviCare
-                  </h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {t.common.welcome}, <span className="text-teal-600 dark:text-teal-400 font-medium">{user?.name}</span>
-                    <span className="ml-1 text-gray-400">· Doctor</span>
-                  </p>
-                </div>
+              <div className="flex items-center gap-4">
+                <BrandLogo subtitle="Doctor Portal" href="/doctor/dashboard" />
+                <span className="hidden md:inline-block text-xs text-gray-400 border-l border-gray-200 dark:border-slate-700 pl-3">
+                  {t.common.welcome}, <span className="text-teal-600 dark:text-teal-400 font-medium">{user?.name}</span>
+                </span>
               </div>
 
               {/* Actions */}
               <div className="flex items-center gap-2 sm:gap-3">
+                <Button
+                  onClick={() => navigate("/screening/dashboard")}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-950/30 transition-all duration-200"
+                >
+                  <Microscope className="h-4 w-4" />
+                  <span className="hidden sm:inline">Screening</span>
+                </Button>
                 <LanguageSwitcher />
                 <ThemeToggle />
                 <Button
@@ -84,7 +85,7 @@ export default function DoctorDashboard() {
         {/* ====== Main Content ====== */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-1 shadow-sm h-auto">
+            <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-1 shadow-sm h-auto">
               <TabsTrigger
                 value="profile"
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
@@ -106,13 +107,6 @@ export default function DoctorDashboard() {
                 <FolderOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Treatment</span>
               </TabsTrigger>
-              <TabsTrigger
-                value="contact"
-                className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.doctor.contactAasha}</span>
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile">
@@ -125,10 +119,6 @@ export default function DoctorDashboard() {
 
             <TabsContent value="treatment">
               {visitedTabs.has("treatment") && <TreatmentAnalysis />}
-            </TabsContent>
-
-            <TabsContent value="contact">
-              {visitedTabs.has("contact") && <ContactAasha />}
             </TabsContent>
           </Tabs>
         </main>

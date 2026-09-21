@@ -2,7 +2,7 @@
 export interface User {
   email: string
   password?: string
-  role: "admin" | "aasha_worker" | "doctor" | "patient"
+  role: "admin" | "aasha_worker" | "doctor" | "patient" | "lab" | "pathology" | "screening_van"
   name: string
   id: string
 }
@@ -41,14 +41,17 @@ export const authenticateUser = async (email: string, password: string): Promise
 export const registerNewUser = async (
   email: string,
   password: string,
-  userType: "doctor" | "ashaWorker" | "patient",
+  userType: "doctor" | "ashaWorker" | "patient" | "lab" | "pathology" | "screening_van",
   userData: any,
 ): Promise<{ success: boolean; error?: string; user?: User }> => {
   try {
-    const roleMapping: Record<string, "admin" | "aasha_worker" | "doctor" | "patient"> = {
+    const roleMapping: Record<string, User["role"]> = {
       doctor: "doctor",
       patient: "patient",
       ashaWorker: "aasha_worker",
+      lab: "lab",
+      pathology: "pathology",
+      screening_van: "screening_van",
     }
 
     const res = await fetch(`${API_BASE}/auth/register`, {
@@ -57,7 +60,7 @@ export const registerNewUser = async (
       body: JSON.stringify({
         email,
         password,
-        role: roleMapping[userType] || "patient",
+        role: roleMapping[userType] || userType || "patient",
         ...userData,
       }),
     })
@@ -143,6 +146,10 @@ export const getDashboardPathForRole = (role: User["role"]) => {
       return "/doctor/dashboard"
     case "aasha_worker":
       return "/aasha-worker/dashboard"
+    case "lab":
+    case "pathology":
+    case "screening_van":
+      return "/screening/dashboard"
     case "patient":
     default:
       return "/patient/dashboard"

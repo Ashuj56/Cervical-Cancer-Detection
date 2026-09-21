@@ -16,7 +16,8 @@ import ContactDoctor from "@/components/aasha-worker/contact-doctor"
 import ContactPatients from "@/components/aasha-worker/contact-patients"
 import AashaWorkerGuidelines from "@/components/aasha-worker/aasha-worker-guidelines"
 import AssignPatient from "@/components/aasha-worker/assign-patient"
-import { LogOut, User, UserPlus, BookOpen, MessageCircle, Link2, Activity, MapPin } from "lucide-react"
+import { BrandLogo } from "@/components/brand-logo"
+import { LogOut, User, UserPlus, BookOpen, MessageCircle, ClipboardList } from "lucide-react"
 
 export default function AashaWorkerDashboard() {
   const [activeTab, setActiveTab] = useState("add-patient")
@@ -50,19 +51,11 @@ export default function AashaWorkerDashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Brand + Title */}
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
-                  <Activity className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">
-                    CerviCare
-                  </h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {t.common.welcome}, <span className="text-teal-600 dark:text-teal-400 font-medium">{user?.name}</span>
-                    <span className="ml-1 text-gray-400">· ASHA Worker</span>
-                  </p>
-                </div>
+              <div className="flex items-center gap-4">
+                <BrandLogo subtitle="ASHA Worker Portal" href="/aasha-worker/dashboard" />
+                <span className="hidden md:inline-block text-xs text-gray-400 border-l border-gray-200 dark:border-slate-700 pl-3">
+                  {t.common.welcome}, <span className="text-teal-600 dark:text-teal-400 font-medium">{user?.name}</span>
+                </span>
               </div>
 
               {/* Actions */}
@@ -126,8 +119,8 @@ export default function AashaWorkerDashboard() {
                 value="assign"
                 className="flex items-center gap-1.5 rounded-lg text-xs sm:text-sm py-2.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
               >
-                <MapPin className="h-4 w-4" />
-                <span className="hidden lg:inline">Screening Referrals</span>
+                <ClipboardList className="h-4 w-4" />
+                <span className="hidden lg:inline">Patient Referrals</span>
               </TabsTrigger>
             </TabsList>
 

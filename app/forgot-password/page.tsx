@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp"
+import { BrandLogo } from "@/components/brand-logo"
 
 type Step = "email" | "otp"
 
@@ -69,11 +70,13 @@ export default function ForgotPasswordPage() {
       if (otp !== generatedOtp) {
         throw new Error("Incorrect OTP. Please try again.")
       }
-
       toast({
         title: "OTP verified",
-        description: "A password reset link has been sent to your email.",
+        description: "Password reset link sent to your email. Check your inbox.",
       })
+      setTimeout(() => {
+        window.location.href = "/login"
+      }, 1500)
     } catch (err) {
       toast({
         title: "Verification failed",
@@ -86,12 +89,13 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-blue-900">
-            {step === "email" ? "Reset Password" : "Verify OTP"}
-          </CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#fdfaf7] via-teal-50 to-teal-100 dark:from-slate-950 dark:via-teal-950/30 dark:to-slate-950 p-4">
+      <Card className="w-full max-w-md shadow-xl border-gray-200/80 dark:border-slate-700/80">
+        <CardHeader className="space-y-3 text-center">
+          <div className="flex justify-center pb-2">
+            <BrandLogo href="/" />
+          </div>
+          <CardTitle className="text-xl font-bold">Reset Password</CardTitle>
           <CardDescription>
             {step === "email"
               ? "Enter your email to receive a one-time passcode (OTP)."
